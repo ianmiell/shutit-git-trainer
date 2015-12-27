@@ -72,6 +72,55 @@ class git_trainer(ShutItModule):
 		#                                    - Get input from user and return output
 		# shutit.fail(msg)                   - Fail the program and exit with status 1
 		# 
+		shutit.login('bash')
+		shutit.send('rm -rf /tmp/shutit-git-trainer')
+		shutit.send('mkdir -p /tmp/shutit-git-trainer')
+		shutit.send('cd /tmp/shutit-git-trainer')
+
+       and this will just output the name of the resulting tree, in this case (if you have done exactly as I’ve described) it should be
+
+           8988da15d077d4829fc51d8544c097def6644dbb
+
+       which is another incomprehensible object name. Again, if you want to, you can use git cat-file -t 8988d... to see that this time the object is not a "blob"
+       object, but a "tree" object (you can also use git cat-file to actually output the raw object contents, but you’ll see mainly a binary mess, so that’s less
+       interesting).
+
+       However — normally you’d never use git write-tree on its own, because normally you always commit a tree into a commit object using the git commit-tree command. In
+       fact, it’s easier to not actually use git write-tree on its own at all, but to just pass its result in as an argument to git commit-tree.
+
+       git commit-tree normally takes several arguments — it wants to know what the parent of a commit was, but since this is the first commit ever in this new
+       repository, and it has no parents, we only need to pass in the object name of the tree. However, git commit-tree also wants to get a commit message on its
+       standard input, and it will write out the resulting object name for the commit to its standard output.
+
+       And this is where we create the .git/refs/heads/master file which is pointed at by HEAD. This file is supposed to contain the reference to the top-of-tree of the
+       master branch, and since that’s exactly what git commit-tree spits out, we can do this all with a sequence of simple shell commands:
+
+           $ tree=$(git write-tree)
+           $ commit=$(echo 'Initial commit' | git commit-tree $tree)
+           $ git update-ref HEAD $commit
+
+       In this case this creates a totally new commit that is not related to anything else. Normally you do this only once for a project ever, and all later commits will
+       be parented on top of an earlier commit.
+
+       Again, normally you’d never actually do this by hand. There is a helpful script called git commit that will do all of this for you. So you could have just written
+       git commit instead, and it would have done the above magic scripting for you.
+
+MAKING A CHANGE
+       Remember how we did the git update-index on file hello and then we changed hello afterward, and could compare the new state of hello with the state we saved in
+       the index file?
+
+       Further, remember how I said that git write-tree writes the contents of the index file to the tree, and thus what we just committed was in fact the original
+       contents of the file hello, not the new ones. We did that on purpose, to show the difference between the index state, and the state in the working tree, and how
+       they don’t have to match, even when we commit things.
+
+       As before, if we do git diff-files -p in our git-tutorial project, we’ll still see the same difference we saw last time: the index file hasn’t changed by the act
+       of committing anything. However, now that we have committed something, we can also learn to use a new command: git diff-index.
+
+       Unlike git diff-files, which showed the difference between the index file and the working tree, git diff-index shows the differences between a committed tree and
+       either the index file or the working tree. In other words, git diff-index wants a tree to be diffed against, and before we did the commit, we couldn’t do that,
+
+
+		shutit.logout()
 		return True
 
 	def get_config(self, shutit):
@@ -101,7 +150,7 @@ def module():
 		'shutit.tk.git_trainer.git_trainer', 782914092.0001,
 		description='',
 		maintainer='',
-		delivery_methods=['docker'],
+		delivery_methods=['bash'],
 		depends=['shutit.tk.setup']
 	)
 
