@@ -73,6 +73,8 @@ class git_trainer(ShutItModule):
 		# shutit.fail(msg)                   - Fail the program and exit with status 1
 		# 
 		shutit.install('git')
+		shutit.send('git config --global user.email "you@utopia.com"')
+		shutit.send('git config --global user.name "NoName"')
 		shutit.send('mkdir git-tutorial && cd git-tutorial',note='Make a directory for our first repository and move into it.')
 		shutit.send('git init',note='Initialise our git repository')
 		shutit.send('ls .git',note='A .git directory has been created, with a file HEAD and two directories (objects and refs).\n\nThe file called head is similar to a symboilc link and points to refs/heads/master (which does not exist yet).\n\nobjects contains the real data of your project, and refs contains references to these data.\n\nThe special master head is the default branch, which is why the .git/HEAD file was created points to it even if it does not yet exist. Basically, the HEAD link is supposed to always point to the branch you are working on right now, and you always start out expecting to work on the master branch. An advanced user may want to take a look at gitrepository-layout(5) after finishing this tutorial.')
