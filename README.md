@@ -1,4 +1,6 @@
-An automated and interactive git trainer:
+# Git Core Trainer
+
+An automated and interactive git trainer, built using Docker and ShutIt:
 
 [![asciicast](https://asciinema.org/a/32807.png)](https://asciinema.org/a/32807?t=70)
 
